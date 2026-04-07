@@ -13,6 +13,9 @@ argy = {
     final_args = {}
 }
 
+
+
+
 function argy:flag(flag_name, flag_type) 
     assert(type(flag_name) == "string", "flag " .. flag_name .. " is not of type string")
     assert(string.len(flag_name) == 2, "flag " .. flag_name .. " is not of size: " .. 2)
@@ -32,7 +35,6 @@ end
 
 function argy:positional_arg(arg_position, arg_type)
     assert(type(arg_position) == "number", "positional arg " .. arg_position .. " is not of type number" )
-    --assert(arg_position>0, "positional arg" .. arg_position .. "must be greater than 0") -- let them have 0
     self.no_dash.positional_args[arg_position] = arg_type
 end
 
@@ -43,10 +45,11 @@ function argy:which_group(arg_name, index) --Return arg group from arg value and
     end
 end
 
+
 function argy:parse_arg(argument,index)
     local group_funcs = {
         [self.dash.args] = {skip_amount= 2, arg_value =arg[index+1]},
-        [self.no_dash.positional_args] = {skip_amount= 1,arg_value = arg[index]},
+        [self.no_dash.positional_args] = {skip_amount= 1,arg_value = arg[index], is_pos=true},
         [self.dash.flags] = {skip_amount= 1,arg_value = true}
     }
     local group = self:which_group(argument,index)
@@ -58,6 +61,7 @@ function argy:estab_fargs()
     while parg <= #arg do
         arg_name = arg[parg]
         local parg_table_ret = argy:parse_arg(arg_name,parg)
+        if parg_table_ret.is_pos then arg_name = parg end
         self.final_args[arg_name] = parg_table_ret.arg_value
         parg=parg+parg_table_ret.skip_amount
     end
@@ -67,12 +71,13 @@ argy:arg("--hi", "string")
 argy:arg("--bi", "string")
 print(argy.dash.args["--hi"])
 argy:flag("-h", "string")
---argy:positional_arg(4, "string")
+argy:positional_arg(3, "string")
+argy:positional_arg(4, "string")
 --argy:estab_pos_arg(1, "string")
 --print(argy.args["--hi"])
 --print(argy:which_group("--hi"))
 argy:estab_fargs() 
 print(argy.final_args["--hi"])
 print(argy.final_args["--bi"])
-print(argy.final_args["-h"])
+print(argy.final_args[2])
 --print(argy.final_args)
