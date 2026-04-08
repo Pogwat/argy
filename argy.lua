@@ -1,83 +1,86 @@
 -- cmd -a "b"    -c "d"
 argy = {
-            
-    no_dash = {
-        positional_args = {} -- arg,
-    },
-    
-    dash = { 
+        positional_args = {}, -- arg,
         args = {}, -- -a --arg
-        flags = {} -- -f
-    },
-
-    final_args = {}
+        flags = {}, -- -f
+        final_args = {}
 }
 
-
-
-
-function argy:flag(flag_name, flag_type) 
-    assert(type(flag_name) == "string", "flag " .. flag_name .. " is not of type string")
-    assert(string.len(flag_name) == 2, "flag " .. flag_name .. " is not of size: " .. 2)
-    assert(string.find(flag_name, "^-"),"flag dosent start with -") -- probably should check if next char is not - we dont want -- as a flag
-    assert(string.find(flag_name, "^--")~=nil,"flag name is -")
-    self.dash.flags[flag_name] = flag_type
+function argy:flag(name,arg_string, arg_type) 
+    assert(type(arg_string) == "string", "flag " .. arg_string .. " is not of type string")
+    assert(string.len(arg_string) == 2, "flag " .. arg_string .. " is not of size: " .. 2)
+    assert(string.find(arg_string, "^-"),"flag dosent start with -") -- probably should check if next char is not - we dont want -- as a flag
+    assert(string.find(arg_string, "^--")~=nil,"flag name is -")
+    self.flags[arg_string] = name
+    self.final_args[name] = {type = arg_type}
 end
 
-function argy:arg(arg_name, arg_type)
-    assert(type(arg_name) == "string", "arg " .. arg_name .. " is not of type string" )
-    assert(string.len(arg_name)>=2, "arg " .. arg_name .. " is not of size >2")
+function argy:arg(name,arg_string, arg_type)
+    assert(type(arg_string) == "string", "arg " .. arg_string .. " is not of type string" )
+    assert(string.len(arg_string)>=2, "arg " .. arg_string .. " is not of size >2")
     assert(
-        string.find(arg_name, "^--") or string.find(arg_name, "^-"), 
+        string.find(arg_string, "^--") or string.find(arg_string, "^-"), 
         "arg dosent start with -- or -")
-    self.dash.args[arg_name] = arg_type
+    self.args[arg_string] = name
+    self.final_args[name] = {type = arg_type}
 end
 
-function argy:positional_arg(arg_position, arg_type)
+function argy:positional_arg(name, arg_position, arg_type)
     assert(type(arg_position) == "number", "positional arg " .. arg_position .. " is not of type number" )
-    self.no_dash.positional_args[arg_position] = arg_type
+    self.positional_args[arg_position] = name
+    self.final_args[name] = {type = arg_type}
+    
 end
 
-function argy:which_group(arg_name, index) --Return arg group from arg value and index
-    if self.no_dash.positional_args[index]~=nil then return self.no_dash.positional_args
-        elseif self.dash.args[arg_name]~=nil then return self.dash.args
-        elseif self.dash.flags[arg_name]~=nil then return self.dash.flags
-    end
+function argy:is_string_arg_or_flag(arg_string)
+    if string.find(arg_string, "^--")~=nil then return "argument" end
+    if string.find(arg_string, "^-")~=nil then return "flag" end
 end
 
+function argy:is_name_arg_or_flag(name)
+    if self.args[name]~=nil then return "argument", self.args[name] end
+    if self.flags[name]~=nil then return "flag", self.flags[name] end
+end
 
-function argy:parse_arg(argument,index)
-    local group_funcs = {
-        [self.dash.args] = {skip_amount= 2, arg_value =arg[index+1]},
-        [self.no_dash.positional_args] = {skip_amount= 1,arg_value = arg[index], is_pos=true},
-        [self.dash.flags] = {skip_amount= 1,arg_value = true}
+function argy:is_index_pos_arg(index) 
+    if self.positional_args[index]~=nil then return "positional_arg", self.positional_args[index] end
+end
+
+function argy:handle_arg_type(arg_type, position)
+    local types = {
+        ["argument"] = {value = arg[position+1], skip =2, table = self.args, table_index = arg[position]},
+        ["flag"] =  {value = true, skip = 1, table = self.flags, table_index = arg[position]},
+        ["positional_arg"] =  {value = arg[position], skip = 1, table = self.positional_args, table_index = position }
     }
-    local group = self:which_group(argument,index)
-    return group_funcs[group] or error(argument .." is not a valid argument")
+    return types[arg_type]
 end
 
 function argy:estab_fargs() 
-    local parg = 1
-    while parg <= #arg do
-        arg_name = arg[parg]
-        local parg_table_ret = argy:parse_arg(arg_name,parg)
-        if parg_table_ret.is_pos then arg_name = parg end
-        self.final_args[arg_name] = parg_table_ret.arg_value
-        parg=parg+parg_table_ret.skip_amount
+    local position = 1
+    while position <= #arg do
+        local arg_string = arg[position]
+        local arg_type = self:is_index_pos_arg(position) or self:is_string_arg_or_flag(arg_string) or nil
+        local handler = self:handle_arg_type(arg_type, position)
+        local arg_name = handler.table[handler.table_index]
+        self.final_args[arg_name] = handler.value
+        position=position+handler.skip
     end
 end
 
-argy:arg("--hi", "string")
-argy:arg("--bi", "string")
-print(argy.dash.args["--hi"])
-argy:flag("-h", "string")
-argy:positional_arg(3, "string")
-argy:positional_arg(4, "string")
+--print(arg[1])
+argy:arg("hi","--hi", "string")
+argy:arg("bi","--bi", "string")
+--print(argy.args["--hi"])
+argy:flag("h","-h", "string")
+argy:positional_arg("am",3, "string")
+argy:positional_arg("mine",4, "string")
 --argy:estab_pos_arg(1, "string")
 --print(argy.args["--hi"])
 --print(argy:which_group("--hi"))
 argy:estab_fargs() 
-print(argy.final_args["--hi"])
-print(argy.final_args["--bi"])
-print(argy.final_args[2])
+print(argy.final_args["hi"])
+--print(argy.final_args["bi"])
+-- print(argy.final_args[2])
 --print(argy.final_args)
+
+return argy --this is cool! The parser uses the return
