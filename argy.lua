@@ -36,14 +36,20 @@ function argy:positional_arg(name, arg_position, arg_type)
     
 end
 
+function argy:get(name) 
+    return self.final_args[name]
+end
+
 function argy:is_string_arg_or_flag(arg_string)
-    if string.find(arg_string, "^%-%-")~=nil then return "argument" end
-    if string.find(arg_string, "^%-")~=nil then return "flag" end
+    if string.find(arg_string, "^%-%-")~=nil and self.args[arg_string]~=nil then return "argument" end
+    if string.find(arg_string, "^%-")~=nil and self.flags[arg_string]~=nil then return "flag"
+    elseif self.args[arg_string]~=nil then return "argument" end
 end
 
 function argy:is_name_arg_or_flag(name)
-    if self.args[name]~=nil then return "argument", self.args[name] end
-    if self.flags[name]~=nil then return "flag", self.flags[name] end
+    self.final_args[name] = arg_string or error(name .." is not in final_args")
+    if self.args[arg_string]~=nil then return "argument", self.args[arg_string] end
+    if self.flags[arg_string]~=nil then return "flag", self.flags[arg_string] end
 end
 
 function argy:is_index_pos_arg(index) 
@@ -59,7 +65,7 @@ function argy:handle_arg_type(arg_type, position)
     return types[arg_type]
 end
 
-function argy:estab_fargs() 
+function argy:gen_fargs() 
     local position = 1
     while position <= #arg do
         local arg_string = arg[position]
@@ -74,14 +80,13 @@ end
 --print(arg[1])
 argy:arg("hi","--hi", "string")
 argy:arg("bi","--bi", "string")
---print(argy.args["--hi"])
 argy:flag("h","-h", "string")
 argy:positional_arg("am",3, "string")
 argy:positional_arg("mine",4, "string")
---argy:estab_pos_arg(1, "string")
---print(argy.args["--hi"])
---print(argy:which_group("--hi"))
-argy:estab_fargs() 
+print(argy.args["--hi"])
+
+argy:gen_fargs() 
+print(argy:get("hi"))
 -- print(argy.final_args["hi"])
 -- print(argy.final_args["am"])
 -- print(argy.final_args["mine"])
