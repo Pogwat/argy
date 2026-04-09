@@ -41,9 +41,8 @@ function argy:get(name)
 end
 
 function argy:is_string_arg_or_flag(arg_string)
-    if string.find(arg_string, "^%-%-")~=nil and self.args[arg_string]~=nil then return "argument" end
-    if string.find(arg_string, "^%-")~=nil and self.flags[arg_string]~=nil then return "flag"
-    elseif self.args[arg_string]~=nil then return "argument" end
+    if self.args[arg_string]~=nil then return "argument" end
+    if self.flags[arg_string]~=nil then return "flag" end
 end
 
 function argy:is_name_arg_or_flag(name)
