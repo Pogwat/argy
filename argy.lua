@@ -47,8 +47,7 @@ end
 
 function argy:is_name_arg_or_flag(name)
     self.final_args[name] = arg_string or error(name .." is not in final_args")
-    if self.args[arg_string]~=nil then return "argument", self.args[arg_string] end
-    if self.flags[arg_string]~=nil then return "flag", self.flags[arg_string] end
+    is_string_arg_or_flag(arg_string)
 end
 
 function argy:is_index_pos_arg(index) 
