@@ -10,45 +10,40 @@ argy.positional_args.__index = function(table,key) return table[key] .." is not 
 argy.args.__index = function(table,key) return table[key] .." is not a value in " .. table end
 argy.flags.__index = function(table,key) return table[key] .." is not a value in " .. table end
 
-function argy:flag(name,arg_string, arg_type) 
+function argy:flag(name,arg_string, input_type) 
     assert(type(arg_string) == "string", "flag " .. arg_string .. " is not of type string")
     assert(string.len(arg_string) == 2, "flag " .. arg_string .. " is not of size: " .. 2)
     assert(string.find(arg_string, "^%-"),"flag dosent start with -") -- probably should check if next char is not - we dont want -- as a flag
     assert(string.find(arg_string, "^%-%-")==nil,"flag " .. arg_string .." name is -")
     self.flags[arg_string] = name
-    self.final_args[name] = {type = arg_type}
+    self.final_args[name] = {type = input_type, arg_type = "flag"}
 end
 
-function argy:arg(name,arg_string, arg_type)
+function argy:arg(name,arg_string, input_type)
     assert(type(arg_string) == "string", "arg " .. arg_string .. " is not of type string" )
     assert(string.len(arg_string)>=2, "arg " .. arg_string .. " is not of size >2")
     assert(
         string.find(arg_string, "^%-%-") or string.find(arg_string, "^%-"), 
         "arg dosent start with -- or -")
     self.args[arg_string] = name
-    self.final_args[name] = {type = arg_type}
+    self.final_args[name] = {type = input_type, arg_type = "argument"}
 end
 
-function argy:positional_arg(name, arg_position, arg_type)
+function argy:positional_arg(name, arg_position, input_type)
     assert(type(arg_position) == "number", "positional arg " .. arg_position .. " is not of type number" )
     self.positional_args[arg_position] = name
-    self.final_args[name] = {type = arg_type}
+    self.final_args[name] = {type = input_type, arg_type = "positional_argument"}
     
 end
 
-function argy:get(name) 
-    return self.final_args[name]
-end
+function argy:get(name) return self.final_args[name] end
 
 function argy:is_string_arg_or_flag(arg_string)
     if self.args[arg_string]~=nil then return "argument" end
     if self.flags[arg_string]~=nil then return "flag" end
 end
 
-function argy:is_name_arg_or_flag(name)
-    self.final_args[name] = arg_string or error(name .." is not in final_args")
-    is_string_arg_or_flag(arg_string)
-end
+function argy:name_arg_type(name) return self.final_args[name].arg_type end
 
 function argy:is_index_pos_arg(index) 
     if self.positional_args[index]~=nil then return "positional_arg", self.positional_args[index] end
