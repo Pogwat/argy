@@ -40,14 +40,11 @@ function argy:gen_help()
     help = help.."\n"
     --print(help .. help_buf)
 
-end
-
-
-function argy:help_handler()
-        if argy:get("help")~=nil then
+    if argy:get("help")~=nil then
         print(help .. help_buf)
         os.exit()
     end
+
 end
 
 -- cmd [OPTIONS] [FLAGS] [POSITIONAL]

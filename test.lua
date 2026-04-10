@@ -21,4 +21,3 @@ print(argy:get("hi"))
 
  
  argy:gen_help()
- argy:help_handler()
