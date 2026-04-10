@@ -20,7 +20,6 @@ argy = {
 }
 
 function argy:initalizers(arg_table, assert_callback)
-    --local arg_table = self.args
     assert_callback = assert_callback or function() end
     return function(self,name,arg_ident, input_type) -- fix for the ":" funciton calls which pass self as first arg
     local arg_type = arg_table.__arg_type
@@ -56,7 +55,9 @@ function argy:is_string_arg_or_flag(arg_string)
     if self.flags[arg_string]~=nil then return self.flags.__arg_type end
 end
 
-function argy:name_arg_type(name) return self.final_args[name].arg_type end
+function argy:name_arg_type(name) return 
+    self.final_args[name].arg_table.__arg_type
+end
 
 function argy:is_index_pos_arg(index) 
     if self.positional_args[index]~=nil then return  self.positional_args.__arg_type end
