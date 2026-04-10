@@ -1,59 +1,111 @@
 -- cmd -a "b"    -c "d"
+local ahandler = function(table,key) return table[key] .." is not a value in " .. table end
 argy = {
-        positional_args = {}, -- arg,
-        args = {}, -- -a --arg
-        flags = {}, -- -f
+        positional_args = {
+            __arg_type = "positional_argument",
+            __index = ahandler,
+            __index_type = "number"
+        }, -- arg,
+        args = {
+            __arg_type = "argument",
+            __index = ahandler,
+            __index_type = "string"
+        }, -- -a --arg
+        flags = {
+            __arg_type = "flag",
+            __index = ahandler,
+            __index_type = "string"
+        }, -- -f
         final_args = {}
 }
 
-argy.positional_args.__index = function(table,key) return table[key] .." is not a value in " .. table end
-argy.args.__index = function(table,key) return table[key] .." is not a value in " .. table end
-argy.flags.__index = function(table,key) return table[key] .." is not a value in " .. table end
-
 function argy:flag(name,arg_string, input_type) 
-    assert(type(arg_string) == "string", "flag " .. arg_string .. " is not of type string")
-    assert(string.len(arg_string) == 2, "flag " .. arg_string .. " is not of size: " .. 2)
-    assert(string.find(arg_string, "^%-"),"flag dosent start with -") -- probably should check if next char is not - we dont want -- as a flag
-    assert(string.find(arg_string, "^%-%-")==nil,"flag " .. arg_string .." name is -")
-    self.flags[arg_string] = name
-    self.final_args[name] = {type = input_type, arg_type = "flag"}
+    local arg_table = self.flags
+    local arg_type = arg_table.__arg_type
+    local arg_index_type = arg_table.__index_type
+    assert(type(arg_string) == arg_index_type, arg_type.." "..arg_string .. " is not of type "..arg_index_type)
+
+    assert(string.len(arg_string) == 2, arg_type.." "..arg_string.." is not of size: "..2)
+    assert(string.find(arg_string, "^%-"), arg_type.." dosent start with -")
+    assert(string.find(arg_string, "^%-%-")==nil, arg_type.." ".. arg_string.." name is -")
+
+    arg_table[arg_string] = name
+    self.final_args[name] = {type = input_type, arg_table = arg_table}
 end
 
 function argy:arg(name,arg_string, input_type)
-    assert(type(arg_string) == "string", "arg " .. arg_string .. " is not of type string" )
-    assert(string.len(arg_string)>=2, "arg " .. arg_string .. " is not of size >2")
+    local arg_table = self.args
+    local arg_type = arg_table.__arg_type
+    local arg_index_type = arg_table.__index_type
+    assert(type(arg_string) == arg_index_type, arg_type.." "..arg_string .. " is not of type "..arg_index_type )
+
+    assert(string.len(arg_string)>=2, arg_type.." "..arg_string .. " is not of size >2")
     assert(
         string.find(arg_string, "^%-%-") or string.find(arg_string, "^%-"), 
-        "arg dosent start with -- or -")
-    self.args[arg_string] = name
-    self.final_args[name] = {type = input_type, arg_type = "argument"}
+        arg_type.." dosent start with -- or -")
+
+    arg_table[arg_string] = name
+    self.final_args[name] = {type = input_type, arg_table = arg_table}
 end
 
-function argy:positional_arg(name, arg_position, input_type)
-    assert(type(arg_position) == "number", "positional arg " .. arg_position .. " is not of type number" )
-    self.positional_args[arg_position] = name
-    self.final_args[name] = {type = input_type, arg_type = "positional_argument"}
-    
+-- function argy:positional_arg(name, arg_position, input_type)
+--     local arg_table = self.positional_args
+--     local arg_type = arg_table.__arg_type
+--     local arg_index_type = arg_table.__index_type
+--     assert(type(arg_position) == arg_index_type, arg_type.." "..arg_position.." is not of type "..arg_index_type )
+
+--     arg_table[arg_position] = name
+--     self.final_args[name] = {type = input_type, arg_table = arg_table}
+-- end
+
+function argy:initalizers(arg_table, assert_callback)
+    --local arg_table = self.args
+    assert_callback = assert_callback or function() end
+    return function(self,name,arg_ident, input_type) -- fix for the ":" funciton calls which pass self as first arg
+    local arg_type = arg_table.__arg_type
+    local arg_index_type = arg_table.__index_type
+    assert(type(arg_ident) == arg_index_type, arg_type.." "..arg_ident.." is not of type "..arg_index_type )
+    assert_callback(arg_ident)
+    arg_table[arg_ident] = name
+    self.final_args[name] = {type = input_type, arg_table = arg_table}
+    end
 end
+
+argy.positional_arg = argy:initalizers(argy.positional_args)
+
+
+function argy:assert_arg(arg_string)    
+    assert(string.len(arg_string)>=2, arg_type.." "..arg_string .. " is not of size >2")
+    assert(
+        string.find(arg_string, "^%-%-") or string.find(arg_string, "^%-"), 
+        arg_type.." dosent start with -- or -")
+end
+
+function argy:assert_flag(arg_string)
+    assert(string.len(arg_string) == 2, arg_type.." "..arg_string.." is not of size: "..2)
+    assert(string.find(arg_string, "^%-"), arg_type.." dosent start with -")
+    assert(string.find(arg_string, "^%-%-")==nil, arg_type.." ".. arg_string.." name is -")
+end
+
 
 function argy:get(name) return self.final_args[name] end
 
 function argy:is_string_arg_or_flag(arg_string)
-    if self.args[arg_string]~=nil then return "argument" end
-    if self.flags[arg_string]~=nil then return "flag" end
+    if self.args[arg_string]~=nil then return self.args.__arg_type end
+    if self.flags[arg_string]~=nil then return self.flags.__arg_type end
 end
 
 function argy:name_arg_type(name) return self.final_args[name].arg_type end
 
 function argy:is_index_pos_arg(index) 
-    if self.positional_args[index]~=nil then return "positional_arg", self.positional_args[index] end
+    if self.positional_args[index]~=nil then return  self.positional_args.__arg_type end
 end
 
 function argy:handle_arg_type(arg_type, position)
     local types = {
-        ["argument"] = {value = arg[position+1]  , skip =2, table = self.args, table_index = arg[position]},
-        ["flag"] =  {value = true, skip = 1, table = self.flags, table_index = arg[position]},
-        ["positional_arg"] =  {value = arg[position], skip = 1, table = self.positional_args, table_index = position }
+        [self.args.__arg_type] = {value = arg[position+1]  , skip =2, table = self.args, table_index = arg[position]},
+        [self.flags.__arg_type] =  {value = true, skip = 1, table = self.flags, table_index = arg[position]},
+        [self.positional_args.__arg_type] =  {value = arg[position], skip = 1, table = self.positional_args, table_index = position }
     }
     return types[arg_type]
 end
