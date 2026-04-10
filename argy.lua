@@ -1,22 +1,10 @@
 -- cmd -a "b"    -c "d"
 local ahandler = function(table,key) return table[key] .." is not a value in " .. table end
 argy = {
-        positional_args = {
-            __arg_type = "positional_argument",
-            __index = ahandler,
-            __index_type = "number"
-        }, -- arg,
-        args = {
-            __arg_type = "argument",
-            __index = ahandler,
-            __index_type = "string"
-        }, -- -a --arg
-        flags = {
-            __arg_type = "flag",
-            __index = ahandler,
-            __index_type = "string"
-        }, -- -f
-        final_args = {}
+    positional_args = {__arg_type = "positional_argument", __index = ahandler,__index_type = "number"}, -- arg,
+    args = {__arg_type = "argument",__index = ahandler,__index_type = "string"}, -- -a --arg
+    flags = {__arg_type = "flag",__index = ahandler,__index_type = "string"}, -- -f
+    final_args = {}
 }
 
 function argy:initalizers(arg_table, assert_callback)
@@ -55,9 +43,7 @@ function argy:is_string_arg_or_flag(arg_string)
     if self.flags[arg_string]~=nil then return self.flags.__arg_type end
 end
 
-function argy:name_arg_type(name) return 
-    self.final_args[name].arg_table.__arg_type
-end
+function argy:name_arg_type(name) return self.final_args[name].arg_table.__arg_type end
 
 function argy:is_index_pos_arg(index) 
     if self.positional_args[index]~=nil then return  self.positional_args.__arg_type end
