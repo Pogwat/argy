@@ -19,45 +19,6 @@ argy = {
         final_args = {}
 }
 
-function argy:flag(name,arg_string, input_type) 
-    local arg_table = self.flags
-    local arg_type = arg_table.__arg_type
-    local arg_index_type = arg_table.__index_type
-    assert(type(arg_string) == arg_index_type, arg_type.." "..arg_string .. " is not of type "..arg_index_type)
-
-    assert(string.len(arg_string) == 2, arg_type.." "..arg_string.." is not of size: "..2)
-    assert(string.find(arg_string, "^%-"), arg_type.." dosent start with -")
-    assert(string.find(arg_string, "^%-%-")==nil, arg_type.." ".. arg_string.." name is -")
-
-    arg_table[arg_string] = name
-    self.final_args[name] = {type = input_type, arg_table = arg_table}
-end
-
-function argy:arg(name,arg_string, input_type)
-    local arg_table = self.args
-    local arg_type = arg_table.__arg_type
-    local arg_index_type = arg_table.__index_type
-    assert(type(arg_string) == arg_index_type, arg_type.." "..arg_string .. " is not of type "..arg_index_type )
-
-    assert(string.len(arg_string)>=2, arg_type.." "..arg_string .. " is not of size >2")
-    assert(
-        string.find(arg_string, "^%-%-") or string.find(arg_string, "^%-"), 
-        arg_type.." dosent start with -- or -")
-
-    arg_table[arg_string] = name
-    self.final_args[name] = {type = input_type, arg_table = arg_table}
-end
-
--- function argy:positional_arg(name, arg_position, input_type)
---     local arg_table = self.positional_args
---     local arg_type = arg_table.__arg_type
---     local arg_index_type = arg_table.__index_type
---     assert(type(arg_position) == arg_index_type, arg_type.." "..arg_position.." is not of type "..arg_index_type )
-
---     arg_table[arg_position] = name
---     self.final_args[name] = {type = input_type, arg_table = arg_table}
--- end
-
 function argy:initalizers(arg_table, assert_callback)
     --local arg_table = self.args
     assert_callback = assert_callback or function() end
@@ -65,28 +26,28 @@ function argy:initalizers(arg_table, assert_callback)
     local arg_type = arg_table.__arg_type
     local arg_index_type = arg_table.__index_type
     assert(type(arg_ident) == arg_index_type, arg_type.." "..arg_ident.." is not of type "..arg_index_type )
-    assert_callback(arg_ident)
+    assert_callback(arg_ident,arg_type)
     arg_table[arg_ident] = name
     self.final_args[name] = {type = input_type, arg_table = arg_table}
     end
 end
 
-argy.positional_arg = argy:initalizers(argy.positional_args)
-
-
-function argy:assert_arg(arg_string)    
+function argy.assert_arg(arg_string,arg_type)  
     assert(string.len(arg_string)>=2, arg_type.." "..arg_string .. " is not of size >2")
     assert(
         string.find(arg_string, "^%-%-") or string.find(arg_string, "^%-"), 
         arg_type.." dosent start with -- or -")
 end
 
-function argy:assert_flag(arg_string)
+function argy.assert_flag(arg_string,arg_type)
     assert(string.len(arg_string) == 2, arg_type.." "..arg_string.." is not of size: "..2)
     assert(string.find(arg_string, "^%-"), arg_type.." dosent start with -")
     assert(string.find(arg_string, "^%-%-")==nil, arg_type.." ".. arg_string.." name is -")
 end
 
+argy.positional_arg = argy:initalizers(argy.positional_args)
+argy.arg = argy:initalizers(argy.args, argy.assert_arg)
+argy.flag = argy:initalizers(argy.flags, argy.assert_flag)
 
 function argy:get(name) return self.final_args[name] end
 
