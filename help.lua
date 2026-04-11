@@ -1,6 +1,6 @@
 require "argy"
 
-argy:flag("help", "-h")
+argy:flag("help", "-h", "boolean","help")
 
 local program_name = arg[0]
 local help = program_name
