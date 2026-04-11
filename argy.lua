@@ -34,7 +34,7 @@ function argy:initalizers(arg_table, assert_callback)
     assert_callback(arg_ident,arg_type)
     arg_table[arg_ident] = name
     arg_table["__len"] = arg_table["__len"]+1
-    self.final_args[name] = {type = input_type, arg_table = arg_table}
+    self.final_args[name] = {type = input_type, arg_table = arg_table, description = description}
     end
 end
 
