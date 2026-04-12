@@ -52,7 +52,7 @@ function argy:get(name)
     return self.final_args.args[name].value 
 end
 
-function argy:get_unused(position) return self.unused_args[position] end
+function argy:get_unused(position) return self.unused_args.args[position] end
 
 function argy:is_string_arg_or_flag(arg_string)
     if self.args.args[arg_string]~=nil then return self.args.arg_type end
@@ -85,7 +85,8 @@ function argy:gen_fargs()
             self.final_args.args[arg_name].value = handler.value 
             position=position+handler.skip
         else
-            self.unused_args[position] = arg_string
+            self.unused_args.args[position] = arg_string
+            self.unused_args.len = self.unused_args.len+1
             position=position+1
         end
 
