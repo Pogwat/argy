@@ -12,11 +12,11 @@ function argy:new_table(name,arg_type,name_type, index_func)
     return self[name]
 end
 
-argy:new_table("positional_args","positional_argument","number")
-argy:new_table("args","argument","string")
+argy:new_table("positional_args","positional_arg","number")
+argy:new_table("args","arg","string")
 argy:new_table("flags","flag","string")
-argy:new_table("unused_args",nil,nil)
-argy:new_table("final_args",nil,nil)
+argy:new_table("unused_args","unused_arg",nil)
+argy:new_table("final_args","final_arg",nil)
 
 function argy:initalizers(arg_table, assert_callback)
     assert_callback = assert_callback or function() end
