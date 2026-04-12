@@ -10,7 +10,9 @@ argy:gen_fargs()
 argy:gen_help()    
 
 print(argy:get("hi"))
-print(argy.final_args["am"].value)
+print(argy:get("am"))
+print(argy:get("mine"))
+print(argy:get_unused(5))
 
  
  

@@ -22,6 +22,8 @@ argy = {
         __len = 4
     }, -- -f
 
+    unused_args = {},
+
     final_args = {}
 }
 
@@ -57,6 +59,8 @@ argy.flag = argy:initalizers(argy.flags, argy.assert_flag)
 
 function argy:get(name) return self.final_args[name].value end
 
+function argy:get_unused(position) return self.unused_args[position] end
+
 function argy:is_string_arg_or_flag(arg_string)
     if self.args[arg_string]~=nil then return self.args.__arg_type end
     if self.flags[arg_string]~=nil then return self.flags.__arg_type end
@@ -81,11 +85,16 @@ function argy:gen_fargs()
     local position = 1
     while position <= #arg do
         local arg_string = arg[position]
-        local arg_type = self:is_index_pos_arg(position) or self:is_string_arg_or_flag(arg_string) or error(arg_string .." matched no type")
-        local handler = self:handle_arg_type(arg_type, position)
-        local arg_name = handler.table[handler.table_index] or error(arg_string .. " did not match a table")
-        self.final_args[arg_name].value = handler.value 
-        position=position+handler.skip
+        local arg_type = self:is_index_pos_arg(position) or self:is_string_arg_or_flag(arg_string) -- or error(arg_string .." matched no type")
+        if arg_type~=nil then
+            local handler = self:handle_arg_type(arg_type, position)
+            local arg_name = handler.table[handler.table_index] or error(arg_string .. " did not match a table")
+            self.final_args[arg_name].value = handler.value 
+            position=position+handler.skip
+        else
+            self.unused_args[position] = arg_string
+            position=position+1
+        end
     end
 end
 
