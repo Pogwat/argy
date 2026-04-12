@@ -1,42 +1,23 @@
 -- cmd -a "b"    -c "d"
 local ahandler = function(table,key) return table[key] .." is not a value in " .. table end
-argy = {
-    positional_args = {
-        args = {},
-        arg_type = "positional_argument",
-        name_type = "number",
-        len = 0,
-        __index = function(table,key) return table.args[key] end
-    }, -- arg,
+argy = {}
 
-    args = {
+function argy:new_table(name,arg_type,name_type, index_func) 
+    self[name] = {
         args = {},
-        arg_type = "argument",
-        name_type = "string",
+        arg_type = arg_type,
+        name_type = name_type,
         len = 0,
-        __index = function(table,key) return table.args[key] end
-    }, -- -a --arg
-
-    flags = {
-        args = {},
-        arg_type = "flag",
-        name_type = "string",
-        len = 0,
-        __index = function(table,key) return table.args[key] end
-    }, -- -f
-
-    unused_args = {
-        args = {},
-        len = 0,
-        __index = function(table,key) return table.args[key] end
-    },
-
-    final_args = {
-        args = {},
-        len = 0,
-        __index = function(table,key) return table.args[key] end
+        __index = index_func or function(table,key) return table.args[key] end
     }
-}
+end
+
+argy:new_table("positional_args","positional_argument","number")
+argy:new_table("args","argument","string")
+argy:new_table("flags","flag","string")
+argy:new_table("unused_args",nil,nil)
+argy:new_table("final_args",nil,nil)
+
 
 function argy:initalizers(arg_table, assert_callback)
     assert_callback = assert_callback or function() end
