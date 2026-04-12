@@ -7,9 +7,9 @@ function argy:new_table(name,arg_type,name_type, index_func)
         args = {},
         arg_type = arg_type,
         name_type = name_type,
-        len = 0,
-        __index = index_func or function(table,key) return table.args[key] end
+        len = 0
     }
+    return self[name]
 end
 
 argy:new_table("positional_args","positional_argument","number")
@@ -17,7 +17,6 @@ argy:new_table("args","argument","string")
 argy:new_table("flags","flag","string")
 argy:new_table("unused_args",nil,nil)
 argy:new_table("final_args",nil,nil)
-
 
 function argy:initalizers(arg_table, assert_callback)
     assert_callback = assert_callback or function() end
@@ -27,7 +26,7 @@ function argy:initalizers(arg_table, assert_callback)
     assert(type(arg_ident) == arg_name_type, arg_type.." "..arg_ident.." is not of type "..arg_name_type )
     assert_callback(arg_ident,arg_type)
     arg_table.args[arg_ident] = name
-    arg_table["len"] = arg_table["len"]+1
+    arg_table.len = arg_table.len+1
     self.final_args.args[name] = {type = input_type, arg_table = arg_table, description = description}
     end
 end
