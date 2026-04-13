@@ -5,7 +5,7 @@ argy.args:arg("hi","--hi", "string", "are you hi or are you bye")
 argy.args:arg("bi","--bi", "string", "how bye are you")
 argy.positional_args:positional_arg("am",3, "string")
 argy.positional_args:positional_arg("mine",4, "string")
-
+print(argy:check_tables("hi").arg_type)
 argy:gen_fargs() 
 argy:gen_help()    
 

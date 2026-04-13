@@ -1,5 +1,8 @@
 -- cmd -a "b"    -c "d"
-argy = {}
+argy = {
+    inputs = {},
+    outputs = {}
+}
 argy_methods = {}
 argy_methods.__index = argy_methods
 
@@ -72,6 +75,15 @@ end
 
 function argy:is_index_pos_arg(index) 
     if self.positional_args.args[index]~=nil then return  self.positional_args.arg_type end
+end
+
+function argy:check_tables(value) 
+    local arg_type = type(value)
+    for key,table in pairs(self) do
+        if type(table) == "table" and table.args and table.name_type==arg_type and table.args[value] then
+            return table
+        end
+    end
 end
 
 function argy:handle_arg_type(arg_type, position)
