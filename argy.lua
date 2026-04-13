@@ -1,8 +1,5 @@
 -- cmd -a "b"    -c "d"
-local ahandler = function(table,key) return table[key] .." is not a value in " .. table end
-argy = {
-}
-
+argy = {}
 argy_methods = {}
 argy_methods.__index = argy_methods
 
@@ -72,8 +69,6 @@ function argy:is_string_arg_or_flag(arg_string)
     if self.args.args[arg_string]~=nil then return self.args.arg_type end
     if self.flags.args[arg_string]~=nil then return self.flags.arg_type end
 end
-
-function argy:name_arg_type(name) return self.final_args[name].arg_table.arg_type end
 
 function argy:is_index_pos_arg(index) 
     if self.positional_args.args[index]~=nil then return  self.positional_args.arg_type end
