@@ -10,6 +10,7 @@ function argy_methods:get(name)
 end
 
 function argy_methods:set(name,value)
+    local old_value = self:get(name)
     if value~=nil then
         if self:get(name)==nil then 
             self.len = self.len+1
@@ -19,12 +20,6 @@ function argy_methods:set(name,value)
         self.len = self.len - 1
     end
     self.args[name] = value
-    return value
-end
-
-function argy_methods:remove(name)
-    local old_value = self:get(name)
-    self:set(name,nil)
     return old_value
 end
 
