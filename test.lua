@@ -9,10 +9,10 @@ argy:positional_arg("mine",4, "string")
 argy:gen_fargs() 
 argy:gen_help()    
 
-print(argy:get("hi"))
-print(argy:get("am"))
-print(argy:get("mine"))
-print(argy:get_unused(5))
+print(argy.final_args:get("hi"))
+print(argy.final_args:get("am"))
+print(argy.final_args:get("mine"))
+print(argy.unused_args:get(5))
 
  
  

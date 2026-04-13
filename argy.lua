@@ -2,13 +2,39 @@
 local ahandler = function(table,key) return table[key] .." is not a value in " .. table end
 argy = {}
 
+argy_methods = {}
+argy_methods.__index = argy_methods
+
+function argy_methods:get(name) 
+    return self.args[name]
+end
+
+function argy_methods:set(name,value)
+    if value~=nil then
+        if self:get(name)==nil then 
+            self.len = self.len+1
+        end
+        assert(type(value) == self.arg_type, name.." has value: "..tostring(value).." which is not of type "..self.arg_type)
+    elseif value == nil and self.args[name] ~= nil then
+        self.len = self.len - 1
+    end
+    self.args[name] = value
+    return value
+end
+
+function argy_methods:remove(name)
+    local old_value = self:get(name)
+    self:set(name,nil)
+    return old_value
+end
+
 function argy:new_table(name,arg_type,name_type, index_func) 
-    self[name] = {
+    self[name] = setmetatable ({
         args = {},
         arg_type = arg_type,
         name_type = name_type,
         len = 0
-    }
+    }, argy_methods)
     return self[name]
 end
 
@@ -47,12 +73,6 @@ end
 argy.positional_arg = argy:initalizers(argy.positional_args)
 argy.arg = argy:initalizers(argy.args, argy.assert_arg)
 argy.flag = argy:initalizers(argy.flags, argy.assert_flag)
-
-function argy:get(name) 
-    return self.final_args.args[name].value 
-end
-
-function argy:get_unused(position) return self.unused_args.args[position] end
 
 function argy:is_string_arg_or_flag(arg_string)
     if self.args.args[arg_string]~=nil then return self.args.arg_type end
