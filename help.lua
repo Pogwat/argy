@@ -1,6 +1,6 @@
 require "argy"
 
-argy:flag("help", "-h", "boolean","help")
+argy.flags:flag("help", "-h", "boolean","help")
 
 local program_name = arg[0]
 local help = program_name
@@ -29,7 +29,7 @@ function argy:gen_help()
     if flags_len>earg_len then help = help .. " [FLAGS]" end
     help = help.."\n".. flags_buf .. args_buf
 
-    if argy.final_args:get("help")~=nil then
+    if argy.final_args:get("help").value~=nil then
         print(help)
         os.exit()
     end

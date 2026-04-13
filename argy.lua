@@ -1,6 +1,7 @@
 -- cmd -a "b"    -c "d"
 local ahandler = function(table,key) return table[key] .." is not a value in " .. table end
-argy = {}
+argy = {
+}
 
 argy_methods = {}
 argy_methods.__index = argy_methods
@@ -15,12 +16,23 @@ function argy_methods:set(name,value)
         if self:get(name)==nil then 
             self.len = self.len+1
         end
-        assert(type(value) == self.arg_type, name.." has value: "..tostring(value).." which is not of type "..self.arg_type)
+        assert(type(name) == self.name_type, name.." is not of type "..self.name_type)
     elseif value == nil and self.args[name] ~= nil then
         self.len = self.len - 1
     end
     self.args[name] = value
     return old_value
+end
+
+function argy_methods:initalizers(assert_callback, push_val_where )
+    local assert_callback = assert_callback or function() end
+    local push_val_where = push_val_where or argy.final_args.args
+    self[self.arg_type] = function(self,name,arg_ident, input_type, description) -- fix for the ":" funciton calls which pass self as first arg
+    assert(type(arg_ident) == self.name_type, self.arg_type.." "..arg_ident.." is not of type "..self.name_type )
+    assert_callback(arg_ident,self.arg_type)
+    self:set(arg_ident,name)
+    push_val_where[name] = {type = input_type, arg_table = arg_table, description = description, value = nil}
+    end
 end
 
 function argy:new_table(name,arg_type,name_type, index_func) 
@@ -36,21 +48,8 @@ end
 argy:new_table("positional_args","positional_arg","number")
 argy:new_table("args","arg","string")
 argy:new_table("flags","flag","string")
-argy:new_table("unused_args","unused_arg",nil)
-argy:new_table("final_args","final_arg",nil)
-
-function argy:initalizers(arg_table, assert_callback)
-    assert_callback = assert_callback or function() end
-    return function(self,name,arg_ident, input_type, description) -- fix for the ":" funciton calls which pass self as first arg
-    local arg_type = arg_table.arg_type
-    local arg_name_type = arg_table.name_type
-    assert(type(arg_ident) == arg_name_type, arg_type.." "..arg_ident.." is not of type "..arg_name_type )
-    assert_callback(arg_ident,arg_type)
-    arg_table.args[arg_ident] = name
-    arg_table.len = arg_table.len+1
-    self.final_args.args[name] = {type = input_type, arg_table = arg_table, description = description}
-    end
-end
+argy:new_table("unused_args","unused_arg","string")
+argy:new_table("final_args","final_arg","string")
 
 function argy.assert_arg(arg_string,arg_type)  
     assert(string.len(arg_string)>=2, arg_type.." "..arg_string .. " is not of size >2")
@@ -65,9 +64,9 @@ function argy.assert_flag(arg_string,arg_type)
     assert(string.find(arg_string, "^%-%-")==nil, arg_type.." ".. arg_string.." name is -")
 end
 
-argy.positional_arg = argy:initalizers(argy.positional_args)
-argy.arg = argy:initalizers(argy.args, argy.assert_arg)
-argy.flag = argy:initalizers(argy.flags, argy.assert_flag)
+argy.positional_args:initalizers()
+argy.args:initalizers(argy.assert_arg)
+argy.flags:initalizers(argy.assert_flag)
 
 function argy:is_string_arg_or_flag(arg_string)
     if self.args.args[arg_string]~=nil then return self.args.arg_type end
