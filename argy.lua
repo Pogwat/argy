@@ -41,6 +41,16 @@ function strip_suffix(s, suffix)
     return string.sub(s, 1, -#suffix - 1)
 end
 
+function argy_methods:setup_inner_args()
+    setmetatable (self.args, {
+        __newindex = function (table,key,value)
+        --print("name_type: ".. self[name].name_type.. ", arg: "..key)
+        assert( type(key)==self.name_type , key.." is not of type "..self.name_type)
+        rawset(table, key, value)
+    end
+    })
+end
+
 argy_top_level = {}
 argy_top_level.__index = argy_top_level
 
@@ -51,17 +61,7 @@ function argy_top_level:new_arg_table(name,arg_type,name_type, index_func)
         name_type = name_type,
         len = 0
     }, argy_methods)
-
-    local inner = {}
-    
-    inner.__newindex = function (table,key,value)
-        --print("name_type: ".. self[name].name_type.. ", arg: "..key)
-        assert( type(key)==self[name].name_type , key.." is not of type "..self[name].name_type)
-        rawset(table, key, value)
-    end
-
-    setmetatable(self[name].args, inner)
-
+    self[name]:setup_inner_args()
     return self[name]
 end
 
