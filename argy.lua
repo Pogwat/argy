@@ -6,9 +6,6 @@ argy = {
 
 argy_methods = {}
 argy_methods.__index = argy_methods
--- argy_methods.args.__newindex = function(table,key,value)
---     assert(type(key)==)
--- end
 
 function argy_methods:get(name) 
     return self.args[name]
@@ -54,6 +51,17 @@ function argy_top_level:new_arg_table(name,arg_type,name_type, index_func)
         name_type = name_type,
         len = 0
     }, argy_methods)
+
+    local inner = {}
+    
+    inner.__newindex = function (table,key,value)
+        --print("name_type: ".. self[name].name_type.. ", arg: "..key)
+        assert( type(key)==self[name].name_type , key.." is not of type "..self[name].name_type)
+        rawset(table, key, value)
+    end
+
+    setmetatable(self[name].args, inner)
+
     return self[name]
 end
 
