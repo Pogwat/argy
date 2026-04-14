@@ -64,8 +64,7 @@ setmetatable(argy.outputs, argy_top_level)
 argy.inputs:new_arg_table("positional_args","positional_arg","number")
 argy.inputs:new_arg_table("args","arg","string")
 argy.inputs:new_arg_table("flags","flag","string")
-
-argy.outputs:new_arg_table("unused_args","unused_arg","string")
+argy.outputs:new_arg_table("unused_args","unused_arg","number")
 argy.outputs:new_arg_table("final_args","final_arg","string")
 
 function argy.assert_arg(arg_string,arg_type)  
@@ -114,8 +113,7 @@ function argy:gen_fargs()
             self.outputs.final_args.args[arg_name].value = handler.value 
             position=position+handler.skip
         else
-            self.outputs.unused_args.args[position] = arg_string
-            self.outputs.unused_args.len = self.outputs.unused_args.len+1
+            self.outputs.unused_args:set(position,arg_string) 
             position=position+1
         end
 

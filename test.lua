@@ -17,6 +17,7 @@ print(argy.outputs.final_args:get("my").value)
 print(argy.outputs.final_args:get("hi").value)
 print(argy.outputs.final_args:get("am").value)
 print(argy.outputs.final_args:get("mine").value)
+argy.outputs.unused_args:set(5,6)
 print(argy.outputs.unused_args:get(5))
 
  
