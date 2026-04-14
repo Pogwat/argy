@@ -29,7 +29,6 @@ function argy_methods:initalizers(assert_callback, push_val_where )
     local assert_callback = assert_callback or function() end
     local push_val_where = push_val_where or argy.outputs.final_args.args
     self[self.arg_type] = function(self,name,arg_ident, input_type, description) -- fix for the ":" funciton calls which pass self as first arg
-    assert(type(arg_ident) == self.name_type, self.arg_type.." "..arg_ident.." is not of type "..self.name_type )
     assert_callback(arg_ident,self.arg_type)
     self:set(arg_ident,name)
     push_val_where[name] = {type = input_type, arg_table = arg_table, description = description, value = nil}
