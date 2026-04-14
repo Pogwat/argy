@@ -36,13 +36,18 @@ function argy_methods:initalizers(assert_callback, push_val_where )
     end
 end
 
+function strip_suffix(s, suffix)
+    assert(string.sub(s,-#suffix) == suffix, suffix.." is not in string "..s)
+    return string.sub(s, 1, -#suffix - 1)
+end
+
 argy_top_level = {}
 argy_top_level.__index = argy_top_level
 
 function argy_top_level:new_arg_table(name,arg_type,name_type, index_func) 
     self[name] = setmetatable ({
         args = {},
-        arg_type = arg_type,
+        arg_type = arg_type or strip_suffix(name, "s"),
         name_type = name_type,
         len = 0
     }, argy_methods)
@@ -110,7 +115,7 @@ function argy:gen_fargs()
         if arg_table~=nil then
             local handler = self.inputs:handle_arg_type(arg_table, position)
             local arg_name = arg_table.args[handler.table_index] or error(arg_string .. " did not match a table")
-            self.outputs.final_args.args[arg_name].value = handler.value 
+            self.outputs.final_args:get(arg_name).value = handler.value 
             position=position+handler.skip
         else
             self.outputs.unused_args:set(position,arg_string) 
