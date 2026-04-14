@@ -6,6 +6,9 @@ argy = {
 
 argy_methods = {}
 argy_methods.__index = argy_methods
+-- argy_methods.args.__newindex = function(table,key,value)
+--     assert(type(key)==)
+-- end
 
 function argy_methods:get(name) 
     return self.args[name]
