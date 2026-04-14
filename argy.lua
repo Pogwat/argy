@@ -13,11 +13,8 @@ end
 
 function argy_methods:set(name,value)
     local old_value = self:get(name)
-    if value~=nil then
-        if self:get(name)==nil then 
-            self.len = self.len+1
-        end
-        assert(type(name) == self.name_type, name.." is not of type "..self.name_type)
+    if value and old_value then
+        self.len = self.len+1
     elseif value == nil and self.args[name] ~= nil then
         self.len = self.len - 1
     end
