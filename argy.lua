@@ -3,6 +3,7 @@ argy = {
     inputs = {},
     outputs = {}
 }
+
 argy_methods = {}
 argy_methods.__index = argy_methods
 
@@ -37,6 +38,7 @@ end
 
 argy_top_level = {}
 argy_top_level.__index = argy_top_level
+
 function argy_top_level:new_arg_table(name,arg_type,name_type, index_func) 
     self[name] = setmetatable ({
         args = {},
@@ -45,6 +47,15 @@ function argy_top_level:new_arg_table(name,arg_type,name_type, index_func)
         len = 0
     }, argy_methods)
     return self[name]
+end
+
+function argy_top_level:check_tables(value) 
+    local arg_type = type(value)
+    for key,table in pairs(self) do
+        if type(table) == "table" and table.name_type==arg_type and table.args[value] then
+            return table
+        end
+    end
 end
 
 setmetatable(argy.inputs, argy_top_level)
@@ -75,28 +86,19 @@ argy.inputs.args:initalizers(argy.assert_arg)
 argy.inputs.flags:initalizers(argy.assert_flag)
 
 function argy:is_string_arg_or_flag(arg_string)
-    if self.inputs.args.args[arg_string]~=nil then return self.inputs.args.arg_type end
-    if self.inputs.flags.args[arg_string]~=nil then return self.inputs.flags.arg_type end
+    if self.inputs.args.args[arg_string]~=nil then return self.inputs.args end
+    if self.inputs.flags.args[arg_string]~=nil then return self.inputs.flags end
 end
 
 function argy:is_index_pos_arg(index) 
-    if self.inputs.positional_args.args[index]~=nil then return  self.inputs.positional_args.arg_type end
+    if self.inputs.positional_args.args[index]~=nil then return  self.inputs.positional_args end
 end
 
-function argy:check_tables(value) 
-    local arg_type = type(value)
-    for key,table in pairs(self) do
-        if type(table) == "table" and table.name_type==arg_type and table.args[value] then
-            return table
-        end
-    end
-end
-
-function argy:handle_arg_type(arg_type, position)
+function argy.inputs:handle_arg_type(arg_type, position)
     local types = {
-        [self.inputs.args.arg_type] = {value = arg[position+1]  , skip =2, table = self.inputs.args.args, table_index = arg[position]},
-        [self.inputs.flags.arg_type] =  {value = true, skip = 1, table = self.inputs.flags.args, table_index = arg[position]},
-        [self.inputs.positional_args.arg_type] =  {value = arg[position], skip = 1, table = self.inputs.positional_args.args, table_index = position }
+        [self.args] = {value = arg[position+1]  , skip =2,  table_index = arg[position]},
+        [self.flags] =  {value = true, skip = 1,  table_index = arg[position]},
+        [self.positional_args] =  {value = arg[position], skip = 1, table_index = position }
     }
     return types[arg_type]
 end
@@ -105,10 +107,10 @@ function argy:gen_fargs()
     local position = 1
     while position <= #arg do
         local arg_string = arg[position]
-        local arg_type = self:is_index_pos_arg(position) or self:is_string_arg_or_flag(arg_string) -- or error(arg_string .." matched no type")
-        if arg_type~=nil then
-            local handler = self:handle_arg_type(arg_type, position)
-            local arg_name = handler.table[handler.table_index] or error(arg_string .. " did not match a table")
+        local arg_table = self:is_index_pos_arg(position) or self:is_string_arg_or_flag(arg_string) -- or error(arg_string .." matched no type")
+        if arg_table~=nil then
+            local handler = self.inputs:handle_arg_type(arg_table, position)
+            local arg_name = arg_table.args[handler.table_index] or error(arg_string .. " did not match a table")
             self.outputs.final_args.args[arg_name].value = handler.value 
             position=position+handler.skip
         else
