@@ -1,7 +1,7 @@
 package = "argy"
 version = "dev-1"
 source = {
-   url = "git+ssh://git@github.com/Pogwat/argy.git"
+   url = "git+https://github.com/Pogwat/argy.git"
 }
 description = {
    summary = "Simple Lua arg parser.",
