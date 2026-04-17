@@ -1,5 +1,5 @@
 require "argy"
-require "help"
+require "optionals.help"
 --print(arg[1])
 argy.inputs.args:arg("hi","--hi", "string", "are you hi or are you bye")
 argy.inputs.args:arg("bi","--bi", "string", "how bye are you")

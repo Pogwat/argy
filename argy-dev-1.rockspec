@@ -16,6 +16,6 @@ build = {
    type = "builtin",
    modules = {
       argy = "argy.lua",
-      help = "help.lua"
+      ["argy.help"] = "optionals/help.lua"
    }
 }
