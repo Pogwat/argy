@@ -1,13 +1,13 @@
 { lua, fetchFromGitHub}:
 lua.pkgs.buildLuarocksPackage {
   pname = "argy";
-  version = "dev-1";
+  version = "dev-2";
 
   src = fetchFromGitHub {
     owner = "Pogwat";
     repo = "argy";
-    rev = "66e232ab0a24086c1d714e91c1924ca121203ca8";
-    hash = "sha256-6ddsTWih7545w5FIzxUciAD8gwiRL9hCXDkkhBbYjfs=";
+    rev = "0ff83ddab6cf60fe673d56973e9ac1c3c29ec96e";
+    hash = "sha256-1Yi3V+OlZHQPwyortnXFNQ4Dc1xBJSUeBg8JJHznM4Y=";
   };
 
   disabled = lua.pkgs.luaOlder "5.1";
