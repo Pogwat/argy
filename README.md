@@ -72,9 +72,33 @@ print(argy.outputs.final_args:get("hi").value)
 
 ```
 
+## Installation
+
+### Using luarocks
+```bash
+luarocks install --server=https://luarocks.org/dev argy
+```
+
+### Using Nix
+
+Get the argy.nix file in this repo
+
+```bash
+git clone https://github.com/Pogwat/argy.git   
+cd argy
+cp argy.nix /etc/nixos #move it to the locaiton of your nix configs/flake
+```
 
 
+then add it to your overlays.
+put this in configuraiton.nix:
 
+```nix
+nixpkgs.overlays = [
 
-
-
+(final: prev: {
+  argy = final.callPackage ./argy.nix {};
+  #Rest of overlays...
+}) 
+];
+```
