@@ -1,5 +1,5 @@
 package = "argy"
-version = "dev-1"
+version = "dev-2"
 source = {
    url = "git+https://github.com/Pogwat/argy.git"
 }
