@@ -50,7 +50,7 @@ end
 argy_top_level = {}
 argy_top_level.__index = argy_top_level
 
-function argy_top_level:new_arg_table(name,arg_type,name_type, index_func) 
+function argy_top_level:new_arg_table(name,arg_type,name_type) 
     self[name] = setmetatable ({
         args = {},
         arg_type = arg_type or strip_suffix(name, "s"),
@@ -112,6 +112,18 @@ function argy.inputs:handle_arg_type(arg_type, position)
         [self.positional_args] =  {value = arg[position], skip = 1, table_index = position }
     }
     return types[arg_type]
+end
+
+function argy.string_to_what(string, totype)
+    assert(type(string)== "string", string.." is not of tpye string")
+    {
+        ["string"] = function(string) return string end,
+        ["number"] = function(string) return tonumber(string) end,
+        ["boolean"] = function(string) 
+            if string =="1" or string =="true" return 1
+            if string =="0" or string =="false" return 0
+        
+    }[totype](string)
 end
 
 function argy:gen_fargs() 
