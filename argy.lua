@@ -120,8 +120,9 @@ function argy.string_to_what(string, totype)
         ["string"] = function(string) return string end,
         ["number"] = function(string) return tonumber(string) end,
         ["boolean"] = function(string) 
-            if string =="1" or string =="true" return 1
-            if string =="0" or string =="false" return 0
+            if string =="1" or string =="true" then return 1 end
+            if string =="0" or string =="false" then return 0 end
+        end
         
     }[totype](string)
 end
