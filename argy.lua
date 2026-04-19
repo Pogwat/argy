@@ -1,33 +1,7 @@
 -- cmd -a "b"    -c "d"
-argy_top_level = {}
-argy_top_level.__index = argy_top_level
-
-function argy_top_level:new_arg_table(name,arg_type,name_type,arg_parser) 
-    self[name] = setmetatable ({
-        args = {},
-        arg_type = arg_type or string:strip_suffix (name, "s"),
-        name_type = name_type,
-        arg_parser = arg_parser,
-        len = 0
-    }, argy_methods)
-    self[name]:setup_inner_args()
-    return self[name]
-end
-
-function argy_top_level:apply_func_to_tables(check_func, ...) 
-    for key,table in pairs(self) do
-        local func_match = check_func(key,table, ...)
-        if func_match  then return key,table,func_match end
-    end
-end
-
-function argy_top_level:which_table_has_arg(arg) 
-    return self:apply_func_to_tables(function(_,table,_) return table:get(arg) end)
-end
-
 argy = {
-    inputs = setmetatable({}, argy_top_level),
-    outputs = setmetatable({}, argy_top_level)
+    inputs = {},
+    outputs = {}
 }
 
 argy_methods = {}
@@ -72,6 +46,32 @@ function argy_methods:setup_inner_args()
     })
 end
 
+argy_top_level = {}
+argy_top_level.__index = argy_top_level
+
+function argy_top_level:new_arg_table(name,arg_type,name_type,arg_parser) 
+    self[name] = setmetatable ({
+        args = {},
+        arg_type = arg_type or string:strip_suffix (name, "s"),
+        name_type = name_type,
+        arg_parser = arg_parser,
+        len = 0
+    }, argy_methods)
+    self[name]:setup_inner_args()
+    return self[name]
+end
+
+function argy_top_level:apply_func_to_tables(check_func, ...) 
+    for key,table in pairs(self) do
+        local func_match = check_func(key,table, ...)
+        if func_match  then return key,table,func_match end
+    end
+end
+
+function argy_top_level:which_table_has_arg(arg) 
+    return self:apply_func_to_tables(function(_,table,_) return table:get(arg) end)
+end
+
 function parser_template(value,skip,use_position_as_key)
     return function (position)
         local value= value or arg[position+skip-1]
@@ -80,6 +80,9 @@ function parser_template(value,skip,use_position_as_key)
         return  value,skip,index
     end
 end
+
+setmetatable(argy.inputs, argy_top_level)
+setmetatable(argy.outputs, argy_top_level)
 
 argy.inputs:new_arg_table("positional_args","positional_arg","number",parser_template(nil,1,true))
 argy.inputs:new_arg_table("args","arg","string",parser_template(nil,2,nil))
