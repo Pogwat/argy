@@ -1,0 +1,315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Argy</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Arg Docs</h1>
+
+
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>argy</strong></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>argy</code></h1>
+<p>
+
+</p>
+<p>
+
+</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#argy_methods:get">argy_methods:get (name)</a></td>
+	<td class="summary">Gets a arg from a argy io subtable's args table</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#argy_methods:set">argy_methods:set (name, value)</a></td>
+	<td class="summary">Sets a arg from a argy io subtable's args table</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#argy_methods:initalizers">argy_methods:initalizers (assert_callback, push_val_where)</a></td>
+	<td class="summary">Retruns a argument initalizer for whatever argy io subtable you call it with
+ This is a funciton generator</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#argy_methods:setup_inner_args">argy_methods:setup_inner_args ()</a></td>
+	<td class="summary">Sets up metetable for a argy io subtable's arguments i.e.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#argy_top_level:new_arg_table">argy_top_level:new_arg_table (name, arg_type, name_type, arg_parser)</a></td>
+	<td class="summary">Creates a new arg table in either the input or output of argy</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#argy_top_level:apply_func_to_tables">argy_top_level:apply_func_to_tables (check_func)</a></td>
+	<td class="summary">Applys a function to every field in a argy io subtable
+ if a match is found the current key, table and function's return are returned</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#argy_top_level:which_table_has_arg">argy_top_level:which_table_has_arg (arg)</a></td>
+	<td class="summary">A Wrapper around argy<em>top</em>level:apply<em>func</em>to<em>tables(check</em>func, ...),
+ that checks each table for a argument and return the key,table and argument value if found</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#gen_fargs">gen_fargs ()</a></td>
+	<td class="summary">Generate final argument's in self.outputs.final_args</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "argy_methods:get"></a>
+    <strong>argy_methods:get (name)</strong>
+    </dt>
+    <dd>
+    Gets a arg from a argy io subtable's args table
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         The Name of the argument
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        Value of the argument
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "argy_methods:set"></a>
+    <strong>argy_methods:set (name, value)</strong>
+    </dt>
+    <dd>
+    Sets a arg from a argy io subtable's args table
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         The Name of the argument to set
+        </li>
+        <li><span class="parameter">value</span>
+         The new Value of the argument
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        The Previous Value of the argument
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "argy_methods:initalizers"></a>
+    <strong>argy_methods:initalizers (assert_callback, push_val_where)</strong>
+    </dt>
+    <dd>
+    Retruns a argument initalizer for whatever argy io subtable you call it with
+ This is a funciton generator
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">assert_callback</span>
+         The assert function to run whenever a argument is created
+ ,this function is provided the arg_string and the type of the io subtable in that order
+        </li>
+        <li><span class="parameter">push_val_where</span>
+         The table to push a arguments content.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        The Generated function as function(self,name,arg<em>ident, input</em>type, description)
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "argy_methods:setup_inner_args"></a>
+    <strong>argy_methods:setup_inner_args ()</strong>
+    </dt>
+    <dd>
+    Sets up metetable for a argy io subtable's arguments i.e.  argy.inputs.my<em>agry</em>type.args
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "argy_top_level:new_arg_table"></a>
+    <strong>argy_top_level:new_arg_table (name, arg_type, name_type, arg_parser)</strong>
+    </dt>
+    <dd>
+    Creates a new arg table in either the input or output of argy
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the name of the table
+        </li>
+        <li><span class="parameter">arg_type</span>
+         the argument type of the table
+        </li>
+        <li><span class="parameter">name_type</span>
+         the type of the argument string identifier
+        </li>
+        <li><span class="parameter">arg_parser</span>
+           the parser function for every argument
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the argument table
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "argy_top_level:apply_func_to_tables"></a>
+    <strong>argy_top_level:apply_func_to_tables (check_func)</strong>
+    </dt>
+    <dd>
+    Applys a function to every field in a argy io subtable
+ if a match is found the current key, table and function's return are returned
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">check_func</span>
+         function to apply to each table recives key and table
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        key,table,func_match
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "argy_top_level:which_table_has_arg"></a>
+    <strong>argy_top_level:which_table_has_arg (arg)</strong>
+    </dt>
+    <dd>
+    A Wrapper around argy<em>top</em>level:apply<em>func</em>to<em>tables(check</em>func, ...),
+ that checks each table for a argument and return the key,table and argument value if found
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">arg</span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        key,table,arg_value
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="index.html#argy_top_level:apply_func_to_tables">argy_top_level:apply_func_to_tables</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "gen_fargs"></a>
+    <strong>gen_fargs ()</strong>
+    </dt>
+    <dd>
+    Generate final argument's in self.outputs.final_args
+
+
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 1980-01-01 00:00:00 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

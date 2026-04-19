@@ -1,15 +1,26 @@
--- cmd -a "b"    -c "d"
+--- @module argy
 argy = {
     inputs = {},
     outputs = {}
 }
+-- cmd -a "b"    -c "d"
 
 argy_methods = {}
 argy_methods.__index = argy_methods
 
+
+--- Gets a arg from a argy io subtable's args table
+--- @param name The Name of the argument
+--- @return Value of the argument
+
 function argy_methods:get(name) 
     return self.args[name]
 end
+
+--- Sets a arg from a argy io subtable's args table
+--- @param name The Name of the argument to set
+--- @param value The new Value of the argument
+--- @return The Previous Value of the argument
 
 function argy_methods:set(name,value)
     local old_value = self:get(name)
@@ -21,6 +32,13 @@ function argy_methods:set(name,value)
     self.args[name] = value
     return old_value
 end
+
+--- Retruns a argument initalizer for whatever argy io subtable you call it with
+--- This is a funciton generator
+--- @param[opt = function() end] assert_callback The assert function to run whenever a argument is created
+--- ,this function is provided the arg_string and the type of the io subtable in that order  
+--- @param[opt = argy.outputs.final_args.args] push_val_where The table to push a arguments content.
+--- @return The Generated function as function(self,name,arg_ident, input_type, description)
 
 function argy_methods:initalizers(assert_callback, push_val_where )
     local assert_callback = assert_callback or function() end
@@ -37,6 +55,7 @@ function string:strip_suffix(s, suffix)
     return string.sub(s, 1, -#suffix - 1)
 end
 
+--- Sets up metetable for a argy io subtable's arguments i.e. argy.inputs.my_agry_type.args
 function argy_methods:setup_inner_args()
     setmetatable (self.args, {
         __newindex = function (table,key,value)
@@ -49,6 +68,12 @@ end
 argy_top_level = {}
 argy_top_level.__index = argy_top_level
 
+--- Creates a new arg table in either the input or output of argy
+--- @param name the name of the table
+--- @param arg_type the argument type of the table 
+--- @param name_type the type of the argument string identifier
+--- @param arg_parser   the parser function for every argument
+--- @return the argument table
 function argy_top_level:new_arg_table(name,arg_type,name_type,arg_parser) 
     self[name] = setmetatable ({
         args = {},
@@ -61,6 +86,10 @@ function argy_top_level:new_arg_table(name,arg_type,name_type,arg_parser)
     return self[name]
 end
 
+--- Applys a function to every field in a argy io subtable
+--- if a match is found the current key, table and function's return are returned 
+--- @param check_func function to apply to each table recives key and table
+--- @return key,table,func_match
 function argy_top_level:apply_func_to_tables(check_func, ...) 
     for key,table in pairs(self) do
         local func_match = check_func(key,table, ...)
@@ -68,6 +97,12 @@ function argy_top_level:apply_func_to_tables(check_func, ...)
     end
 end
 
+
+--- A Wrapper around argy_top_level:apply_func_to_tables(check_func, ...),
+--- that checks each table for a argument and return the key,table and argument value if found
+--- @param arg
+--- @return key,table,arg_value
+--- @see argy_top_level:apply_func_to_tables
 function argy_top_level:which_table_has_arg(arg) 
     return self:apply_func_to_tables(function(_,table,_) return table:get(arg) end)
 end
@@ -118,6 +153,8 @@ argy.inputs.flags:initalizers(argy.assert_flag)
 --     })[totype](string)
 -- end
 
+
+--- Generate final argument's in self.outputs.final_args
 function argy:gen_fargs() 
     local position = 1
     while position <= #arg do
