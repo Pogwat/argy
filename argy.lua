@@ -61,13 +61,25 @@ function argy_top_level:new_arg_table(name,arg_type,name_type)
     return self[name]
 end
 
-function argy_top_level:check_tables(value) 
-    local arg_type = type(value)
+function argy_top_level:tables_to_func(check_func, ...) 
+    local check_func = check_func or function() end
     for key,table in pairs(self) do
-        if type(table) == "table" and table.name_type==arg_type and table.args[value] then
-            return table
-        end
+        local func_match = check_func(key,table, ...)
+        if func_match  then 
+            return key,table,func_match end
     end
+end
+
+function argy_top_level:which_table_has_arg(arg) 
+    local arg_table_name,arg_table,arg_value = self:tables_to_func(
+        function(key,table,...) return table:get(arg) end
+    )
+    return arg_table_name,arg_table,arg_value
+end
+
+
+function argy_top_level:set_arg_parser(name,parser_func)
+    self[name].arg_parser = parser_func
 end
 
 setmetatable(argy.inputs, argy_top_level)
@@ -76,6 +88,25 @@ setmetatable(argy.outputs, argy_top_level)
 argy.inputs:new_arg_table("positional_args","positional_arg","number")
 argy.inputs:new_arg_table("args","arg","string")
 argy.inputs:new_arg_table("flags","flag","string")
+
+function parse_positional(position)
+    local value,skip,table_index = arg[position],1,position
+    return value,skip,table_index
+end
+
+function parse_arg(position)
+    local value,skip,table_index = arg[position+1],2,arg[position]
+    return value,skip,table_index 
+end
+
+function parse_flag(position)
+    local value,skip,table_index = true,1,arg[position]
+    return value,skip,table_index
+end 
+
+argy.inputs:set_arg_parser("positional_args", parse_positional)
+argy.inputs:set_arg_parser("args", parse_arg)
+argy.inputs:set_arg_parser("flags", parse_flag)
 argy.outputs:new_arg_table("unused_args","unused_arg","number")
 argy.outputs:new_arg_table("final_args","final_arg","string")
 
@@ -96,24 +127,6 @@ argy.inputs.positional_args:initalizers()
 argy.inputs.args:initalizers(argy.assert_arg)
 argy.inputs.flags:initalizers(argy.assert_flag)
 
-function argy:is_string_arg_or_flag(arg_string)
-    if self.inputs.args.args[arg_string]~=nil then return self.inputs.args end
-    if self.inputs.flags.args[arg_string]~=nil then return self.inputs.flags end
-end
-
-function argy:is_index_pos_arg(index) 
-    if self.inputs.positional_args.args[index]~=nil then return  self.inputs.positional_args end
-end
-
-function argy.inputs:handle_arg_type(arg_type, position)
-    local types = {
-        [self.args] = {value = arg[position+1]  , skip =2,  table_index = arg[position]},
-        [self.flags] =  {value = true, skip = 1,  table_index = arg[position]},
-        [self.positional_args] =  {value = arg[position], skip = 1, table_index = position }
-    }
-    return types[arg_type]
-end
-
 function argy.string_to_what(string, totype)
     assert(type(string)== "string", string.." is not of tpye string")
     return ({
@@ -125,18 +138,18 @@ function argy.string_to_what(string, totype)
     })[totype](string)
 end
 
---print(argy.string_to_what("0","boolean"))
-
 function argy:gen_fargs() 
     local position = 1
     while position <= #arg do
         local arg_string = arg[position]
-        local arg_table = self:is_index_pos_arg(position) or self:is_string_arg_or_flag(arg_string) -- or error(arg_string .." matched no type")
-        if arg_table~=nil then
-            local handler = self.inputs:handle_arg_type(arg_table, position)
-            local arg_name = arg_table.args[handler.table_index] or error(arg_string .. " did not match a table")
-            self.outputs.final_args:get(arg_name).value = handler.value 
-            position=position+handler.skip
+        local table_name, table, arg_value = self.inputs:which_table_has_arg(position)
+        if not table_name or not table or not arg_value  then
+            table_name, table, arg_value = self.inputs:which_table_has_arg(arg_string)
+        end
+        if table then
+            local value,skip,table_index = table.arg_parser(position)
+            self.outputs.final_args:get(table:get(table_index)).value = value
+            position=position+skip
         else
             self.outputs.unused_args:set(position,arg_string) 
             position=position+1
