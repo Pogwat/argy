@@ -32,7 +32,7 @@ function argy_methods:initalizers(assert_callback, push_val_where )
     end
 end
 
-function strip_suffix(s, suffix)
+function string:strip_suffix(s, suffix)
     assert(string.sub(s,-#suffix) == suffix, suffix.." is not in string "..s)
     return string.sub(s, 1, -#suffix - 1)
 end
@@ -40,7 +40,6 @@ end
 function argy_methods:setup_inner_args()
     setmetatable (self.args, {
         __newindex = function (table,key,value)
-        --print("name_type: ".. self[name].name_type.. ", arg: "..key)
         assert( type(key)==self.name_type , key.." is not of type "..self.name_type)
         rawset(table, key, value)
     end
@@ -53,7 +52,7 @@ argy_top_level.__index = argy_top_level
 function argy_top_level:new_arg_table(name,arg_type,name_type,arg_parser) 
     self[name] = setmetatable ({
         args = {},
-        arg_type = arg_type or strip_suffix(name, "s"),
+        arg_type = arg_type or string:strip_suffix (name, "s"),
         name_type = name_type,
         arg_parser = arg_parser,
         len = 0
@@ -73,27 +72,21 @@ function argy_top_level:which_table_has_arg(arg)
     return self:apply_func_to_tables(function(_,table,_) return table:get(arg) end)
 end
 
+function parser_template(value,skip,use_position_as_key)
+    return function (position)
+        local value= value or arg[position+skip-1]
+        local index = arg[position]
+        if use_position_as_key then index = position end
+        return  value , skip,index
+    end
+end
+
 setmetatable(argy.inputs, argy_top_level)
 setmetatable(argy.outputs, argy_top_level)
 
-function parse_positional(position)
-    local value,skip,table_index = arg[position],1,position
-    return value,skip,table_index
-end
-
-function parse_arg(position)
-    local value,skip,table_index = arg[position+1],2,arg[position]
-    return value,skip,table_index 
-end
-
-function parse_flag(position)
-    local value,skip,table_index = true,1,arg[position]
-    return value,skip,table_index
-end 
-
-argy.inputs:new_arg_table("positional_args","positional_arg","number",parse_positional)
-argy.inputs:new_arg_table("args","arg","string",parse_arg)
-argy.inputs:new_arg_table("flags","flag","string",parse_flag)
+argy.inputs:new_arg_table("positional_args","positional_arg","number",parser_template(nil,1,true))
+argy.inputs:new_arg_table("args","arg","string",parser_template(nil,2,nil))
+argy.inputs:new_arg_table("flags","flag","string",parser_template(true,1,nil))
 argy.outputs:new_arg_table("unused_args","unused_arg","number")
 argy.outputs:new_arg_table("final_args","final_arg","string")
 
@@ -114,7 +107,7 @@ argy.inputs.positional_args:initalizers()
 argy.inputs.args:initalizers(argy.assert_arg)
 argy.inputs.flags:initalizers(argy.assert_flag)
 
-function argy.string_to_what(string, totype)
+function string:to_type(string, totype)
     assert(type(string)== "string", string.." is not of tpye string")
     return ({
         ["string"] = function(string) return string end,
