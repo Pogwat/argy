@@ -50,44 +50,31 @@ end
 argy_top_level = {}
 argy_top_level.__index = argy_top_level
 
-function argy_top_level:new_arg_table(name,arg_type,name_type) 
+function argy_top_level:new_arg_table(name,arg_type,name_type,arg_parser) 
     self[name] = setmetatable ({
         args = {},
         arg_type = arg_type or strip_suffix(name, "s"),
         name_type = name_type,
+        arg_parser = arg_parser,
         len = 0
     }, argy_methods)
     self[name]:setup_inner_args()
     return self[name]
 end
 
-function argy_top_level:tables_to_func(check_func, ...) 
-    local check_func = check_func or function() end
+function argy_top_level:apply_func_to_tables(check_func, ...) 
     for key,table in pairs(self) do
         local func_match = check_func(key,table, ...)
-        if func_match  then 
-            return key,table,func_match end
+        if func_match  then return key,table,func_match end
     end
 end
 
 function argy_top_level:which_table_has_arg(arg) 
-    local arg_table_name,arg_table,arg_value = self:tables_to_func(
-        function(key,table,...) return table:get(arg) end
-    )
-    return arg_table_name,arg_table,arg_value
-end
-
-
-function argy_top_level:set_arg_parser(name,parser_func)
-    self[name].arg_parser = parser_func
+    return self:apply_func_to_tables(function(_,table,_) return table:get(arg) end)
 end
 
 setmetatable(argy.inputs, argy_top_level)
 setmetatable(argy.outputs, argy_top_level)
-
-argy.inputs:new_arg_table("positional_args","positional_arg","number")
-argy.inputs:new_arg_table("args","arg","string")
-argy.inputs:new_arg_table("flags","flag","string")
 
 function parse_positional(position)
     local value,skip,table_index = arg[position],1,position
@@ -104,9 +91,9 @@ function parse_flag(position)
     return value,skip,table_index
 end 
 
-argy.inputs:set_arg_parser("positional_args", parse_positional)
-argy.inputs:set_arg_parser("args", parse_arg)
-argy.inputs:set_arg_parser("flags", parse_flag)
+argy.inputs:new_arg_table("positional_args","positional_arg","number",parse_positional)
+argy.inputs:new_arg_table("args","arg","string",parse_arg)
+argy.inputs:new_arg_table("flags","flag","string",parse_flag)
 argy.outputs:new_arg_table("unused_args","unused_arg","number")
 argy.outputs:new_arg_table("final_args","final_arg","string")
 
@@ -148,7 +135,7 @@ function argy:gen_fargs()
         end
         if table then
             local value,skip,table_index = table.arg_parser(position)
-            self.outputs.final_args:get(table:get(table_index)).value = value
+            self.outputs.final_args:get(arg_value).value = value
             position=position+skip
         else
             self.outputs.unused_args:set(position,arg_string) 
