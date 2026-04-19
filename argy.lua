@@ -13,9 +13,9 @@ end
 
 function argy_methods:set(name,value)
     local old_value = self:get(name)
-    if value and old_value then
-        self.len = self.len+1
-    elseif value == nil and self.args[name] ~= nil then
+    if value and not old_value then
+        self.len = self.len + 1
+    elseif not value and old_value then
         self.len = self.len - 1
     end
     self.args[name] = value
@@ -26,9 +26,9 @@ function argy_methods:initalizers(assert_callback, push_val_where )
     local assert_callback = assert_callback or function() end
     local push_val_where = push_val_where or argy.outputs.final_args.args
     self[self.arg_type] = function(self,name,arg_ident, input_type, description) -- fix for the ":" funciton calls which pass self as first arg
-    assert_callback(arg_ident,self.arg_type)
-    self:set(arg_ident,name)
-    push_val_where[name] = {type = input_type, arg_table = arg_table, description = description, value = nil}
+        assert_callback(arg_ident,self.arg_type)
+        self:set(arg_ident,name)
+        push_val_where[name] = {type = input_type, arg_table = arg_table, description = description, value = nil}
     end
 end
 
@@ -116,16 +116,16 @@ end
 
 function argy.string_to_what(string, totype)
     assert(type(string)== "string", string.." is not of tpye string")
-    {
+    return ({
         ["string"] = function(string) return string end,
         ["number"] = function(string) return tonumber(string) end,
         ["boolean"] = function(string) 
-            if string =="1" or string =="true" then return 1 end
-            if string =="0" or string =="false" then return 0 end
+            return ({["1"] = true, ["0"] = false, ["true"] = true, ["false"] = false})[string] 
         end
-        
-    }[totype](string)
+    })[totype](string)
 end
+
+--print(argy.string_to_what("0","boolean"))
 
 function argy:gen_fargs() 
     local position = 1
